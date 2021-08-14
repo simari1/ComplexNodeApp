@@ -179,4 +179,26 @@ Post.prototype.actuallyUpdate = function () {
   });
 };
 
+Post.delete = function (postIdToDelete, currentUserId) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      let post;
+      try {
+        post = await Post.findSinglePostById(postIdToDelete, currentUserId);
+      } catch (error) {
+        console.log(error);
+      }
+
+      if (post.isVisitorOwner) {
+        postsCollection.deleteOne({ _id: new ObjectID(postIdToDelete) });
+        resolve();
+      } else {
+        reject();
+      }
+    } catch (error) {
+      reject();
+    }
+  });
+};
+
 module.exports = Post;

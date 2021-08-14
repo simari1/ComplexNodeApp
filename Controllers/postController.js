@@ -36,19 +36,19 @@ exports.viewSingle = async function (req, res) {
   }
 };
 
-exports.viewEditScreen = async function(req, res) {
+exports.viewEditScreen = async function (req, res) {
   try {
-    let post = await Post.findSingleById(req.params.id, req.visitorId)
+    let post = await Post.findSingleById(req.params.id, req.visitorId);
     if (post.isVisitorOwner) {
-      res.render("edit-post", {post: post})
+      res.render("edit-post", { post: post });
     } else {
-      req.flash("errors", "You do not have permission to perform that action.")
-      req.session.save(() => res.redirect("/"))
+      req.flash("errors", "You do not have permission to perform that action.");
+      req.session.save(() => res.redirect("/"));
     }
   } catch {
-    res.render("404")
+    res.render("404");
   }
-}
+};
 
 exports.edit = function (req, res) {
   let post = new Post(req.body, req.visitorId, req.params.id);
@@ -74,6 +74,22 @@ exports.edit = function (req, res) {
       req.flash("errors", "No permission");
       req.session.save(function () {
         res.redirect(`/post/${req.params.id}/edit`);
+      });
+    });
+};
+
+exports.delete = function (req, res) {
+  Post.delete(req.params.id, req.visitorId)
+    .then(() => {
+      req.flash("success", "successfully deleted");
+      req.session.save(() => {
+        res.redirect(`/profile/${req.session.user.username}`);
+      });
+    })
+    .catch(() => {
+      req.flash("errors", "No permission");
+      req.session.save(() => {
+        res.redirect("/");
       });
     });
 };
