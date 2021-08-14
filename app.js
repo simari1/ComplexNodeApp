@@ -32,7 +32,20 @@ app.use(flash());
 app.set("views", "views");
 app.set("view engine", "ejs");
 
+//middleware function
+//https://qiita.com/kamihork/items/9707461bcb2ec8346c9b
 app.use(function (req, res, next) {
+  //make all flash messages available from all templates
+  res.locals.errors = req.flash("errors");
+  res.locals.success = req.flash("success");
+
+  //make current user id available on the req object
+  if (req.session.user) {
+    req.visitorId = req.session.user._id;
+  } else {
+    req.visitorId = 0;
+  }
+  // make user session data available from wityhin view templates
   res.locals.user = req.session.user;
   next();
 });

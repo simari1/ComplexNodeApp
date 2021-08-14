@@ -19,7 +19,7 @@ exports.login = function (req, res) {
       });
     })
     .catch(function (err) {
-      req.flash("loginErrors", err);
+      req.flash("errors", err);
       req.session.save(function () {
         res.redirect("/");
       });
@@ -64,9 +64,7 @@ exports.home = function (req, res) {
     //https://stackoverflow.com/questions/64594683/avoid-req-flash-delete-data-on-middleware
     //req.flashで参照すると消えるので注意
     res.render("../Views/home-guest.ejs", {
-      loginErrors: req.flash("loginErrors"),
       registrationErrors: req.flash("registrationErrors"),
-      errors: req.flash("errors"),
     });
   }
 };
@@ -96,9 +94,6 @@ exports.ifUserExists = function (req, res, next) {
 exports.profilePostsScreen = function (req, res) {
   Post.findPostsByAuthorId(req.profileUser._id)
     .then(function (posts) {
-
-      console.log("3", posts);
-
       res.render("../Views/profile.ejs", {
         profileUserName: req.profileUser.username,
         profileAvatar: req.profileUser.avatar,
