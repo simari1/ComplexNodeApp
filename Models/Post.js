@@ -43,15 +43,21 @@ Post.prototype.create = function () {
     this.validate();
     if (!this.errors.length) {
       // save post into database
-      postsCollection
-        .insertOne(this.data)
-        .then(() => {
-          resolve();
-        })
-        .catch(() => {
-          this.errors.push("Please try again later.");
-          reject(this.errors);
-        });
+      try {
+        postsCollection
+          .insertOne(this.data)
+          .then((info) => {
+            console.log("info.insertedId", info.insertedId);
+            resolve(info.insertedId);
+          })
+          .catch(() => {
+            this.errors.push("Please try again later.");
+            reject(this.errors);
+          });
+      } catch (error) {
+        console.log("", error);
+        reject(this.errors);
+      }
     } else {
       reject(this.errors);
     }

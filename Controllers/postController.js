@@ -11,11 +11,19 @@ exports.create = function (req, res) {
   let post = new Post(req.body, req.session.user._id);
   post
     .create()
-    .then(function () {
-      res.send("new");
+    .then(function (newId) {
+      req.flash("success", "successfully created");
+      req.session.save(function () {
+        res.redirect(`/post/${newId}`);
+      });
     })
     .catch(function (err) {
-      res.send(err);
+      err.forEach((e) => {
+        req.flash("errors", e);
+      });
+      req.session.save(function () {
+        res.redirect("/create-post");
+      });
     });
 };
 
@@ -32,7 +40,7 @@ exports.viewEditScreen = async function (req, res) {
   try {
     let post = await Post.findSinglePostById(req.params.id);
     if (post.authorId == req.visitorId) {
-      res.render("../Views/edit-post.ejs", {
+      res.render("edit-post", {
         post: post,
       });
     } else {
@@ -43,7 +51,7 @@ exports.viewEditScreen = async function (req, res) {
       });
     }
   } catch (error) {
-    res.render("../Views/404.ejs");
+    res.render("404");
   }
 };
 

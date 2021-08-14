@@ -87,20 +87,20 @@ exports.ifUserExists = function (req, res, next) {
       next();
     })
     .catch(function () {
-      res.render("../Views/404.ejs");
+      res.render("404");
     });
 };
 
 exports.profilePostsScreen = function (req, res) {
   Post.findPostsByAuthorId(req.profileUser._id)
     .then(function (posts) {
-      res.render("../Views/profile.ejs", {
+      res.render("profile", {
         profileUserName: req.profileUser.username,
         profileAvatar: req.profileUser.avatar,
         posts: posts,
       });
     })
     .catch(function () {
-      res.render("../Views/404.ejs");
+      res.render("404");
     });
 };
