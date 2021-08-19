@@ -93,29 +93,35 @@ Post.prototype.update = function () {
   });
 };
 
-Post.reusablePostQuery = function (uniqueOperations, visitorId) {
+Post.reusablePostQuery = function (
+  uniqueOperations,
+  visitorId,
+  finalOperations = []
+) {
   return new Promise(async function (resolve, reject) {
     try {
-      let aggOperations = uniqueOperations.concat([
-        {
-          $lookup: {
-            from: "user",
-            localField: "author",
-            foreignField: "_id",
-            as: "authorDocument",
+      let aggOperations = uniqueOperations
+        .concat([
+          {
+            $lookup: {
+              from: "user",
+              localField: "author",
+              foreignField: "_id",
+              as: "authorDocument",
+            },
           },
-        },
-        {
-          $project: {
-            title: 1,
-            body: 1,
-            createdDate: 1,
-            authorId: "$author",
-            author: { $arrayElemAt: ["$authorDocument", 0] },
+          {
+            $project: {
+              title: 1,
+              body: 1,
+              createdDate: 1,
+              authorId: "$author",
+              author: { $arrayElemAt: ["$authorDocument", 0] },
+            },
           },
-        },
-        { $sort: { createdDate: -1 } },
-      ]);
+          { $sort: { createdDate: -1 } },
+        ])
+        .concat(finalOperations);
       let posts = await postsCollection.aggregate(aggOperations).toArray();
       // clean up author property in each post object
       posts = posts.map(function (post) {
@@ -196,6 +202,36 @@ Post.delete = function (postIdToDelete, currentUserId) {
         reject();
       }
     } catch (error) {
+      reject();
+    }
+  });
+};
+
+Post.search = function (searchTerm) {
+  return new Promise((resolve, reject) => {
+    try {
+      if (typeof searchTerm == "string") {
+        // let posts = await Post.reusablePostQuery(
+        //   // [{ $match: { $text: { $search: searchTerm } } }],
+        //   [
+        //     { $match: { body: searchTerm } },
+        //     { $sort: { score: { $meta: "textScore" } } },
+        //   ],
+        //   undefined
+        //   // [{ $sort: { score: { $meta: "textScore" } } }]
+        // );
+        console.log("2" + searchTerm);
+        let posts = postsCollection.find({
+          body: "/" + searchTerm + "/",
+        });
+        console.log("3" + posts);
+        resolve(posts);
+      } else {
+        reject();
+      }
+      resolve();
+    } catch (error) {
+      console.log(error);
       reject();
     }
   });

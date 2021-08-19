@@ -93,3 +93,18 @@ exports.delete = function (req, res) {
       });
     });
 };
+
+exports.search = function (req, res) {
+  console.log("1" + req.body.searchTerm);
+
+  Post.search(req.body.searchTerm)
+    .then((posts) => {
+      console.log("5★★" + posts);
+      res.json(posts);
+      console.log("5★★" + posts);
+    })
+    .catch((error) => {
+      console.log("6★★error" + error);
+      res.json([]);
+    });
+};
