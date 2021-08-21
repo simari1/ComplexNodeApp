@@ -208,23 +208,20 @@ Post.delete = function (postIdToDelete, currentUserId) {
 };
 
 Post.search = function (searchTerm) {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     try {
       if (typeof searchTerm == "string") {
-        // let posts = await Post.reusablePostQuery(
-        //   // [{ $match: { $text: { $search: searchTerm } } }],
-        //   [
-        //     { $match: { body: searchTerm } },
-        //     { $sort: { score: { $meta: "textScore" } } },
-        //   ],
-        //   undefined
-        //   // [{ $sort: { score: { $meta: "textScore" } } }]
-        // );
-        console.log("2" + searchTerm);
-        let posts = postsCollection.find({
-          body: "/" + searchTerm + "/",
-        });
-        console.log("3" + posts);
+        posts = await postsCollection
+          .find(
+            {
+              $or: [
+                { body: { $regex: searchTerm } },
+                { title: { $regex: searchTerm } },
+              ],
+            },
+            { fields: { title: 1, body: 1 } }
+          )
+          .toArray();
         resolve(posts);
       } else {
         reject();

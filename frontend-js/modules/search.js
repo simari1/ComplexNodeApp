@@ -55,7 +55,6 @@ export default class Search {
     axios
       .post("/search", { searchTerm: this.inputField.val() })
       .then((response) => {
-        console.log("★★★" + response);
         console.log(response.data);
       })
       .catch((error) => {

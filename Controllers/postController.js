@@ -99,12 +99,9 @@ exports.search = function (req, res) {
 
   Post.search(req.body.searchTerm)
     .then((posts) => {
-      console.log("5★★" + posts);
       res.json(posts);
-      console.log("5★★" + posts);
     })
     .catch((error) => {
-      console.log("6★★error" + error);
       res.json([]);
     });
 };
