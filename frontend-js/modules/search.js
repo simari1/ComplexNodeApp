@@ -37,7 +37,6 @@ export default class Search {
 
   keyPressHandler() {
     let value = this.inputField.val();
-    this.showLoaderIcon();
 
     if (value == "") {
       clearTimeout(this.typingWaitTimer);
@@ -46,11 +45,11 @@ export default class Search {
     }
     if (value && value != this.previousValue) {
       clearTimeout(this.typingWaitTimer);
-      this.hideLoaderIcon();
+      this.showLoaderIcon();
       this.showResultsArea();
       this.typingWaitTimer = setTimeout(() => {
         this.sendRequest();
-      }, 700);
+      }, 3000);
     }
 
     this.previousValue = value;
