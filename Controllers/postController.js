@@ -95,7 +95,6 @@ exports.delete = function (req, res) {
 };
 
 exports.search = function (req, res) {
-  console.log("1" + req.body.searchTerm);
 
   Post.search(req.body.searchTerm)
     .then((posts) => {

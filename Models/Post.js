@@ -51,7 +51,6 @@ Post.prototype.create = function () {
         postsCollection
           .insertOne(this.data)
           .then((info) => {
-            console.log("info.insertedId", info.insertedId);
             resolve(info.insertedId);
           })
           .catch(() => {
@@ -211,22 +210,52 @@ Post.search = function (searchTerm) {
   return new Promise(async (resolve, reject) => {
     try {
       if (typeof searchTerm == "string") {
-        posts = await postsCollection
-          .find(
+        // let posts = await postsCollection
+        //   .find({
+        //     $or: [
+        //       { body: { $regex: searchTerm } },
+        //       { title: { $regex: searchTerm } },
+        //     ],
+        //   })
+        //   .toArray();
+        let posts = await postsCollection
+          .aggregate([
             {
-              $or: [
-                { body: { $regex: searchTerm } },
-                { title: { $regex: searchTerm } },
-              ],
+              $match: {
+                $or: [
+                  { body: { $regex: searchTerm } },
+                  { title: { $regex: searchTerm } },
+                ],
+              },
             },
-            { fields: { title: 1, body: 1 } }
-          )
+            {
+              $lookup: {
+                from: "user",
+                localField: "author",
+                foreignField: "_id",
+                as: "author",
+              },
+            },
+            {
+              $project: {
+                _id: 1,
+                title: 1,
+                body: 1,
+                createdDate: 1,
+                author: {
+                  _id: 1,
+                  username: 1,
+                },
+              },
+            },
+          ])
           .toArray();
+        console.log(posts);
+        console.log(posts[0].author);
         resolve(posts);
       } else {
         reject();
       }
-      resolve();
     } catch (error) {
       console.log(error);
       reject();
