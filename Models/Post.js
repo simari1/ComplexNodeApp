@@ -210,14 +210,6 @@ Post.search = function (searchTerm) {
   return new Promise(async (resolve, reject) => {
     try {
       if (typeof searchTerm == "string") {
-        // let posts = await postsCollection
-        //   .find({
-        //     $or: [
-        //       { body: { $regex: searchTerm } },
-        //       { title: { $regex: searchTerm } },
-        //     ],
-        //   })
-        //   .toArray();
         let posts = await postsCollection
           .aggregate([
             {
@@ -250,8 +242,6 @@ Post.search = function (searchTerm) {
             },
           ])
           .toArray();
-        console.log(posts);
-        console.log(posts[0].author);
         resolve(posts);
       } else {
         reject();

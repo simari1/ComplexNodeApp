@@ -49,7 +49,7 @@ export default class Search {
       this.showResultsArea();
       this.typingWaitTimer = setTimeout(() => {
         this.sendRequest();
-      }, 3000);
+      }, 1000);
     }
 
     this.previousValue = value;
