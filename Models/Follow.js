@@ -1,3 +1,5 @@
+"use strict";
+
 const usersCollection = require("../Utils/db")
   .db("ComplexApp")
   .collection("user");
@@ -5,6 +7,7 @@ const followsCollection = require("../Utils/db")
   .db("ComplexApp")
   .collection("follows");
 const ObjectID = require("mongodb").ObjectID;
+const User = require("./User");
 
 let Follow = function (followedUsername, authorId) {
   this.followedUsername = followedUsername;
@@ -84,6 +87,7 @@ Follow.prototype.delete = function () {
   });
 };
 
+//static methods
 Follow.isVisitorFollowing = async function (followedId, visitorId) {
   let followDoc = await followsCollection.findOne({
     followedId: followedId,
@@ -95,5 +99,86 @@ Follow.isVisitorFollowing = async function (followedId, visitorId) {
     return false;
   }
 };
+
+Follow.getFollowersById = function (id) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      let followers = await followsCollection
+        .aggregate([
+          { $match: { followedId: id } },
+          {
+            $lookup: {
+              from: "user",
+              localField: "authorId",
+              foreignField: "_id",
+              as: "userDoc",
+            },
+          },
+          {
+            $project: {
+              userDoc: {
+                username: 1,
+                email: 1,
+              },
+              // username: { $arrayElemAt: ["$userDoc.username", 0] },
+              // email: { $arrayElemAt: ["$userDoc.email", 0] },
+            },
+          },
+        ])
+        .toArray();
+      followers = followers.map(function (follower) {
+        let user = new User(follower.userDoc[0], true);
+        return { username: follower.userDoc[0].username, avatar: user.avatar };
+      });
+      resolve(followers);
+    } catch {
+      reject();
+    }
+  });
+};
+
+// Follow.getFollowersById = function (id) {
+//   return new Promise(async (resolve, reject) => {
+//     try {
+//       let followers = await followsCollection
+//         .aggregate(
+//           {
+//             $match: { followedId: id },
+//           },
+//           {
+//             $lookup: {
+//               from: "user",
+//               localField: "authorId",
+//               foreignField: "_id",
+//               as: "userDoc",
+//             },
+//           },
+//           {
+//             $project: {
+//               // userDoc: {
+//               //   username: 1,
+//               //   email: 1,
+//               // },
+//               username: {$arrayElemAt: ["$userDoc.username", 0]},
+//               email: {$arrayElemAt: ["$userDoc.email", 0]}
+//             },
+//           }
+//         )
+//         .toArray();
+//       console.log("1 " + followers);
+//       followers = followers.map(function (follower) {
+//         console.log("1.1 " + follower);
+//         let user = new User(follower, true);
+//         console.log("1.2 " + user);
+//         return { username: follower.username, avatar: user.avatar };
+//       });
+//       console.log("2 " + followers);
+//       resolve(followers);
+//     } catch (error) {
+//       console.log("3 " + error);
+//       reject();
+//     }
+//   });
+// };
 
 module.exports = Follow;
