@@ -1,9 +1,14 @@
+"use strict";
+
 const postsCollection = require("../Utils/db")
   .db("ComplexApp")
   .collection("post");
 const ObjectID = require("mongodb").ObjectID;
 const User = require("./User");
 const sanitizeHtml = require("sanitize-html");
+const followsCollection = require("../Utils/db")
+  .db("ComplexApp")
+  .collection("follows");
 
 let Post = function (data, userid, requestedPostId) {
   this.data = data;
@@ -258,6 +263,24 @@ Post.countPostsById = function (id) {
     let postCount = await postsCollection.countDocuments({ author: id });
     resolve(postCount);
   });
+};
+
+Post.getFeed = async function (id) {
+  //create array of users the current user is following
+  let followedUsers = await followsCollection
+    .find({ authorId: new ObjectID(id) })
+    .toArray();
+
+  followedUsers = followedUsers.map(function (followDoc) {
+    return followDoc.followedId;
+  });
+
+  //https://stackoverflow.com/questions/63625421/azure-cosmosdb-getting-error-on-sorting-with-mongodb-api
+  //sortするためにはindexが張っていないといけない
+  return Post.reusablePostQuery([
+    { $match: { author: { $in: followedUsers } } },
+    { $sort: { createdDate: -1 } },
+  ]);
 };
 
 module.exports = Post;

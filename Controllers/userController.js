@@ -57,9 +57,11 @@ exports.register = function (req, res) {
     });
 };
 
-exports.home = function (req, res) {
+exports.home = async function (req, res) {
   if (req.session.user) {
-    res.render("../Views/home-dashboard.ejs");
+    //fetch feed of posts for current user
+    let posts = await Post.getFeed(req.session.user._id);
+    res.render("../Views/home-dashboard.ejs", { posts: posts });
   } else {
     //https://github.com/jaredhanson/connect-flash
     //https://stackoverflow.com/questions/64594683/avoid-req-flash-delete-data-on-middleware
