@@ -1,10 +1,11 @@
 export default class Chat {
   constructor() {
-    this.openedYet;
     this.chatWrapper = $("#chat-wrapper");
     this.openIcon = $(".header-chat-icon");
     this.injectHTML();
     this.closeIcon = $(".chat-title-bar-close");
+    this.chatField = $("#chatField");
+    this.chatForm = $("#chatForm");
     this.events();
   }
 
@@ -13,6 +14,10 @@ export default class Chat {
     this.openIcon.on("click", () => this.showChat());
     this.openIcon.one("click", () => this.openConnection());
     this.closeIcon.on("click", () => this.hideChat());
+    this.chatForm.on("submit", (e) => {
+      this.sendMessageToServer();
+      e.preventDefault();
+    });
   }
 
   //Methods
@@ -37,17 +42,23 @@ export default class Chat {
 
   showChat() {
     this.chatWrapper.addClass("chat--visible");
-    // if (!this.openedYet) {
-    //   this.openConnection();
-    //   this.openedYet = true;
-    // }
   }
 
   openConnection() {
-    alert("open");
+    this.socket = io();
+    this.socket.on("chatMessageFromServer", function(data){
+      alert(data.message);
+    })
   }
 
   hideChat() {
     this.chatWrapper.removeClass("chat--visible");
+  }
+
+  sendMessageToServer() {
+    this.socket.emit("chatMessageFromBrowser", {
+      message: this.chatField.val(),
+    });
+    this.chatField.val('');
   }
 }

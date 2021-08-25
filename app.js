@@ -35,27 +35,6 @@ app.set("view engine", "ejs");
 
 // //middleware function
 // //https://qiita.com/kamihork/items/9707461bcb2ec8346c9b
-// app.use(function (req, res, next) {
-//   //makle markdown available in ejs
-//   res.locals.filterUserHTML = function (content) {
-//     return markdown(content);
-//   };
-
-//   //make all flash messages available from all templates
-//   res.locals.errors = req.flash("errors");
-//   res.locals.success = req.flash("success");
-
-//   //make current user id available on the req object
-//   if (req.session.user) {
-//     req.visitorId = req.session.user._id;
-//   } else {
-//     req.visitorId = 0;
-//   }
-//   // make user session data available from wityhin view templates
-//   res.locals.user = req.session.user;
-//   next();
-// });
-
 app.use(function (req, res, next) {
   // make our markdown function available from within ejs templates
   res.locals.filterUserHTML = function (content) {
@@ -80,4 +59,33 @@ app.use(function (req, res, next) {
 
 app.use("/", router);
 
-module.exports = app;
+// const server = require("http").createServer(app);
+// const io = require("socket.io")(server);
+
+// io.on("connection", function () {
+//   console.log("new suer");
+// });
+
+// module.exports = server;
+// // module.exports = app;
+
+//https://socket.io/get-started/chat
+const http = require("http");
+const server = http.createServer(app);
+const { Server } = require("socket.io");
+
+//お勉強用
+// const { e } = { c: 1,
+//                    d: 2,
+//                    e: { f: 3, g: 5 }
+//                  };
+
+const io = new Server(server);
+
+io.on("connection", function (socket) {
+  socket.on("chatMessageFromBrowser", function (data) {
+    io.emit("chatMessageFromServer", { message: data.message });
+  });
+});
+
+module.exports = server;
