@@ -33,8 +33,6 @@ export default class Search {
   }
 
   //Methods
-  //live-search-results--visible
-
   keyPressHandler() {
     let value = this.inputField.val();
 
