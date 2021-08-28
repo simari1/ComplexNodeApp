@@ -5,6 +5,10 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports["default"] = void 0;
 
+var _dompurify = _interopRequireDefault(require("dompurify"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { "default": obj }; }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
@@ -23,6 +27,7 @@ function () {
     this.closeIcon = $(".chat-title-bar-close");
     this.chatField = $("#chatField");
     this.chatForm = $("#chatForm");
+    this.chatLog = $("#chat");
     this.events();
   } //Events
 
@@ -57,14 +62,27 @@ function () {
     key: "showChat",
     value: function showChat() {
       this.chatWrapper.addClass("chat--visible");
+      this.chatField.focus();
     }
   }, {
     key: "openConnection",
     value: function openConnection() {
+      var _this2 = this;
+
       this.socket = io();
-      this.socket.on("chatMessageFromServer", function (data) {
-        alert(data.message);
+      this.socket.on("welcome", function (data) {
+        _this2.username = data.username;
+        _this2.avatar = data.avatar;
       });
+      this.socket.on("chatMessageFromServer", function (data) {
+        _this2.displayMessageFromServer(data);
+      });
+    }
+  }, {
+    key: "displayMessageFromServer",
+    value: function displayMessageFromServer(data) {
+      this.chatLog.append(_dompurify["default"].sanitize("\n    <div class=\"chat-other\">\n      <a href=\"/profile/".concat(data.username, "\"><img class=\"avatar-tiny\" src=\"https://gravatar.com/avatar/").concat(data.avatar, "?s=128\"></a>\n      <div class=\"chat-message\"><div class=\"chat-message-inner\">\n        <a href=\"/profile/").concat(data.username, "\"><strong>").concat(data.username, ":</strong></a>\n        ").concat(data.message, "\n      </div></div>\n    </div>\n    ")));
+      this.chatLog.get(0).scrollTop = this.chatLog.get(0).scrollHeight;
     }
   }, {
     key: "hideChat",
@@ -77,7 +95,10 @@ function () {
       this.socket.emit("chatMessageFromBrowser", {
         message: this.chatField.val()
       });
-      this.chatField.val('');
+      this.chatLog.append("\n    <div class=\"chat-self\">\n      <div class=\"chat-message\">\n        <div class=\"chat-message-inner\">\n          ".concat(this.chatField.val(), "\n        </div>\n      </div>\n      <img class=\"chat-avatar avatar-tiny\" src=\"https://gravatar.com/avatar/").concat(this.avatar, "?s=128\">\n    </div>\n    "));
+      this.chatLog.get(0).scrollTop = this.chatLog.get(0).scrollHeight;
+      this.chatField.val("");
+      this.chatField.focus();
     }
   }]);
 

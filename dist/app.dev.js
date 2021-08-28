@@ -13,7 +13,9 @@ var MongoStore = require("connect-mongo")(session);
 
 var flash = require("connect-flash");
 
-var markdown = require("marked"); //https://qiita.com/MahoTakara/items/05d1c9fd1a1ee14dc01c#%E3%82%BB%E3%83%83%E3%82%B7%E3%83%A7%E3%83%B3%E7%AE%A1%E7%90%86%E3%81%AE%E3%83%9F%E3%83%89%E3%83%AB%E3%82%A6%E3%82%A7%E3%82%A2%E3%81%AE%E4%BD%9C%E6%88%90
+var markdown = require("marked");
+
+var sanitizeHtml = require("sanitize-html"); //https://qiita.com/MahoTakara/items/05d1c9fd1a1ee14dc01c#%E3%82%BB%E3%83%83%E3%82%B7%E3%83%A7%E3%83%B3%E7%AE%A1%E7%90%86%E3%81%AE%E3%83%9F%E3%83%89%E3%83%AB%E3%82%A6%E3%82%A7%E3%82%A2%E3%81%AE%E4%BD%9C%E6%88%90
 //https://stackoverflow.com/questions/59638751/the-expireafterseconds-option-is-supported-on-ts-field-only-error-is-s
 //https://www.npmjs.com/package/express-session
 
@@ -87,11 +89,26 @@ var _require = require("socket.io"),
 
 
 var io = new Server(server);
+io.use(function (socket, next) {
+  sessionOptions(socket.request, socket.request.res, next);
+});
 io.on("connection", function (socket) {
-  socket.on("chatMessageFromBrowser", function (data) {
-    io.emit("chatMessageFromServer", {
-      message: data.message
+  if (socket.request.session.user) {
+    var user = socket.request.session.user;
+    socket.emit("welcome", {
+      username: user.username,
+      avatar: user.avatar
     });
-  });
+    socket.on("chatMessageFromBrowser", function (data) {
+      socket.broadcast.emit("chatMessageFromServer", {
+        message: sanitizeHtml(data.message, {
+          allowedTags: [],
+          allowedAttributes: []
+        }),
+        username: user.username,
+        avatar: user.avatar
+      });
+    });
+  }
 });
 module.exports = server;
