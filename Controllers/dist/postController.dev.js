@@ -38,7 +38,8 @@ exports.viewSingle = function _callee(req, res) {
         case 3:
           post = _context.sent;
           res.render("single-post-screen", {
-            post: post
+            post: post,
+            title: post.title
           });
           _context.next = 10;
           break;
