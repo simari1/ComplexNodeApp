@@ -141,7 +141,7 @@ exports.profilePostsScreen = function (req, res) {
           followerCount: req.followerCount,
           followingCount: req.followingCount,
         },
-        title: `Profile for ${req.profileUser.username}`
+        title: `Profile for ${req.profileUser.username}`,
       });
     })
     .catch(function () {
@@ -189,4 +189,14 @@ exports.profileFollowingScreen = async function (req, res) {
   } catch {
     res.render("404");
   }
+};
+
+exports.doesUserNameExist = async function (req, res) {
+  User.findByUsername(req.body.username)
+    .then(function () {
+      res.json(true);
+    })
+    .catch(function () {
+      res.json(false);
+    });
 };

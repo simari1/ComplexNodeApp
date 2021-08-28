@@ -1,0 +1,34 @@
+"use strict";
+
+var express = require("express");
+
+var router = express.Router();
+
+var userController = require("../Controllers/userController");
+
+var postController = require("../Controllers/postController");
+
+var followController = require("../Controllers/followController"); //user related
+
+
+router.get("/", userController.home);
+router.post("/register", userController.register);
+router.post("/login", userController.login);
+router.post("/logout", userController.logout);
+router.post("/doesUserNameExist", userController.doesUserNameExist); //profile related
+
+router.get("/profile/:username", userController.ifUserExists, userController.sharedProfileData, userController.profilePostsScreen);
+router.get("/profile/:username/followers", userController.ifUserExists, userController.sharedProfileData, userController.profileFollowersScreen);
+router.get("/profile/:username/following", userController.ifUserExists, userController.sharedProfileData, userController.profileFollowingScreen); //post releated
+
+router.get("/create-post", userController.mustBeLoggedIn, postController.viewCreateScreen);
+router.post("/create-post", userController.mustBeLoggedIn, postController.create);
+router.get("/post/:id", postController.viewSingle);
+router.get("/post/:id/edit", userController.mustBeLoggedIn, postController.viewEditScreen);
+router.post("/post/:id/edit", userController.mustBeLoggedIn, postController.edit);
+router.post("/post/:id/delete", userController.mustBeLoggedIn, postController["delete"]);
+router.post("/search", postController.search); //Follow related routes
+
+router.post("/addFollow/:username", userController.mustBeLoggedIn, followController.addFollow);
+router.post("/removeFollow/:username", userController.mustBeLoggedIn, followController.removeFollow);
+module.exports = router;

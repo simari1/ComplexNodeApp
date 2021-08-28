@@ -271,3 +271,22 @@ exports.profileFollowingScreen = function _callee4(req, res) {
     }
   }, null, null, [[0, 7]]);
 };
+
+exports.doesUserNameExist = function _callee5(req, res) {
+  return regeneratorRuntime.async(function _callee5$(_context5) {
+    while (1) {
+      switch (_context5.prev = _context5.next) {
+        case 0:
+          User.findByUsername(req.body.username).then(function () {
+            res.json(true);
+          })["catch"](function () {
+            res.json(false);
+          });
+
+        case 1:
+        case "end":
+          return _context5.stop();
+      }
+    }
+  });
+};

@@ -3,13 +3,13 @@ const router = express.Router();
 const userController = require("../Controllers/userController");
 const postController = require("../Controllers/postController");
 const followController = require("../Controllers/followController");
-const { route } = require("../app");
 
 //user related
 router.get("/", userController.home);
 router.post("/register", userController.register);
 router.post("/login", userController.login);
 router.post("/logout", userController.logout);
+router.post("/doesUserNameExist", userController.doesUserNameExist);
 
 //profile related
 router.get(
