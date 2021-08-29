@@ -273,17 +273,24 @@ exports.profileFollowingScreen = function _callee4(req, res) {
 };
 
 exports.doesUserNameExist = function _callee5(req, res) {
+  var userExist;
   return regeneratorRuntime.async(function _callee5$(_context5) {
     while (1) {
       switch (_context5.prev = _context5.next) {
         case 0:
-          User.findByUsername(req.body.username).then(function () {
-            res.json(true);
-          })["catch"](function () {
-            res.json(false);
-          });
+          _context5.next = 2;
+          return regeneratorRuntime.awrap(User.checkExistenceByUsername(req.body.username));
 
-        case 1:
+        case 2:
+          userExist = _context5.sent;
+
+          if (userExist === true) {
+            res.send(false);
+          } else {
+            res.send(true);
+          }
+
+        case 4:
         case "end":
           return _context5.stop();
       }

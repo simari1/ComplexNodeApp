@@ -162,9 +162,26 @@ User.findByUsername = function (username) {
         } else {
           reject();
         }
+      });
+  });
+};
+
+User.checkExistenceByUsername = function (username) {
+  return new Promise(function (resolve, reject) {
+    if (typeof username != "string") {
+      return false;
+    }
+    usersCollection
+      .findOne({ username: username })
+      .then(function (userDocument) {
+        if (userDocument === null) {
+          resolve(false);
+        } else {
+          resolve(true);
+        }
       })
       .catch(function () {
-        reject();
+        resolve(false);
       });
   });
 };
