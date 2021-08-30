@@ -3,6 +3,7 @@
 const User = require("../Models/User");
 const Post = require("../Models/Post");
 const Follow = require("../Models/Follow");
+const jwt = require("jsonwebtoken");
 
 exports.login = function (req, res) {
   let user = new User(req.body);
@@ -197,5 +198,47 @@ exports.doesUserNameExist = async function (req, res) {
     res.send(false);
   } else {
     res.send(true);
+  }
+};
+
+exports.apiLogin = function (req, res) {
+  let user = new User(req.body);
+
+  user
+    .login()
+    .then(function (result) {
+      res.json(
+        jwt.sign({ _id: user.data._id }, process.env.JWTSECRET, {
+          expiresIn: "30m",
+        })
+      );
+    })
+    .catch(function (err) {
+      res.json(err);
+    });
+};
+
+//https://qiita.com/sa9ra4ma/items/67edf18067eb64a0bf40
+//JWTのPayloadは暗号化されていない、あくまでBase64 Encodeされているだけなので、パスワードとか重要情報は含んではいけない
+//署名は共通鍵暗号方式で暗号化されているからそれはenvファイルに外だししておく（鍵はサーバー側で管理しておく。署名を検証することによって、データの改ざんが行われていないかチェックすることができる。）
+exports.apiMustBeLoggedIn = function (req, res, next) {
+  try {
+    console.log("apiMustBeLoggedIn1");
+    req.apiUser = jwt.verify(req.body.token, process.env.JWTSECRET);
+    console.log("apiMustBeLoggedIn2");
+    next();
+  } catch (error) {
+    console.log("apiMustBeLoggedIn3" + error);
+    res.json("login failed");
+  }
+};
+
+exports.apiGetPostsByUsername = async function (req, res) {
+  try {
+    let authorDoc = await User.findByUsername(req.params.username);
+    let posts = await Post.findPostsByAuthorId(authorDoc._id);
+    res.json(posts);
+  } catch (error) {
+    res.json("invalid user");
   }
 };

@@ -14,6 +14,8 @@ var Post = require("../Models/Post");
 
 var Follow = require("../Models/Follow");
 
+var jwt = require("jsonwebtoken");
+
 exports.login = function (req, res) {
   var user = new User(req.body);
   user.login().then(function (result) {
@@ -296,4 +298,66 @@ exports.doesUserNameExist = function _callee5(req, res) {
       }
     }
   });
+};
+
+exports.apiLogin = function (req, res) {
+  var user = new User(req.body);
+  user.login().then(function (result) {
+    res.json(jwt.sign({
+      _id: user.data._id
+    }, process.env.JWTSECRET, {
+      expiresIn: "30m"
+    }));
+  })["catch"](function (err) {
+    res.json(err);
+  });
+}; //https://qiita.com/sa9ra4ma/items/67edf18067eb64a0bf40
+//JWTのPayloadは暗号化されていない、あくまでBase64 Encodeされているだけなので、パスワードとか重要情報は含んではいけない
+//署名は共通鍵暗号方式で暗号化されているからそれはenvファイルに外だししておく（鍵はサーバー側で管理しておく。署名を検証することによって、データの改ざんが行われていないかチェックすることができる。）
+
+
+exports.apiMustBeLoggedIn = function (req, res, next) {
+  try {
+    console.log("apiMustBeLoggedIn1");
+    req.apiUser = jwt.verify(req.body.token, process.env.JWTSECRET);
+    console.log("apiMustBeLoggedIn2");
+    next();
+  } catch (error) {
+    console.log("apiMustBeLoggedIn3" + error);
+    res.json("login failed");
+  }
+};
+
+exports.apiGetPostsByUsername = function _callee6(req, res) {
+  var authorDoc, posts;
+  return regeneratorRuntime.async(function _callee6$(_context6) {
+    while (1) {
+      switch (_context6.prev = _context6.next) {
+        case 0:
+          _context6.prev = 0;
+          _context6.next = 3;
+          return regeneratorRuntime.awrap(User.findByUsername(req.params.username));
+
+        case 3:
+          authorDoc = _context6.sent;
+          _context6.next = 6;
+          return regeneratorRuntime.awrap(Post.findPostsByAuthorId(authorDoc._id));
+
+        case 6:
+          posts = _context6.sent;
+          res.json(posts);
+          _context6.next = 13;
+          break;
+
+        case 10:
+          _context6.prev = 10;
+          _context6.t0 = _context6["catch"](0);
+          res.json("invalid user");
+
+        case 13:
+        case "end":
+          return _context6.stop();
+      }
+    }
+  }, null, null, [[0, 10]]);
 };

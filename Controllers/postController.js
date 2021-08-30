@@ -103,3 +103,25 @@ exports.search = function (req, res) {
       res.json([]);
     });
 };
+
+exports.apiCreate = function (req, res) {
+  let post = new Post(req.body, req.apiUser._id);
+  post
+    .create()
+    .then(function (newId) {
+      res.json("created");
+    })
+    .catch(() => {
+      res.json("Create post failed");
+    });
+};
+
+exports.apiDelete = function (req, res) {
+  Post.delete(req.params.id, req.apiUser._id)
+    .then(() => {
+      res.json("deleted");
+    })
+    .catch((err) => {
+      res.json("Delete post failed");
+    });
+};
