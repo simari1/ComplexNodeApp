@@ -49,7 +49,7 @@ function () {
     key: "validate",
     value: function validate() {
       this.form.validate({
-        debug: true,
+        // debug: true,
         rules: {
           username: {
             required: true,
@@ -61,6 +61,10 @@ function () {
               data: {
                 username: function username() {
                   return $("#username-register").val();
+                },
+                //jquery validationに_csrfを渡すと動いた！
+                _csrf: function _csrf() {
+                  return $("[name='_csrf']").val();
                 }
               }
             }
@@ -96,6 +100,12 @@ function () {
         errorElement: "div",
         highlight: function highlight(element, errorClass) {
           $(element).removeClass(errorClass);
+        },
+        //jquery validationを使った場合はsubmitは自分でやってやる必要がある
+        //https://jqueryvalidation.org/validate/#submithandler
+        //https://stackoverflow.com/questions/14366899/submit-handler-not-working
+        submitHandler: function submitHandler(form) {
+          form.submit();
         }
       });
     }

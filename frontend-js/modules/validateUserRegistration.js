@@ -29,7 +29,7 @@ export default class ValidateUserRegistration {
   //methods
   validate() {
     this.form.validate({
-      debug: true,
+      // debug: true,
       rules: {
         username: {
           required: true,
@@ -41,6 +41,10 @@ export default class ValidateUserRegistration {
             data: {
               username: function () {
                 return $("#username-register").val();
+              },
+              //jquery validationに_csrfを渡すと動いた！
+              _csrf: function () {
+                return $("[name='_csrf']").val();
               },
             },
           },
@@ -70,6 +74,12 @@ export default class ValidateUserRegistration {
       errorElement: "div",
       highlight: function (element, errorClass) {
         $(element).removeClass(errorClass);
+      },
+      //jquery validationを使った場合はsubmitは自分でやってやる必要がある
+      //https://jqueryvalidation.org/validate/#submithandler
+      //https://stackoverflow.com/questions/14366899/submit-handler-not-working
+      submitHandler: function (form) {
+        form.submit();
       },
     });
   }

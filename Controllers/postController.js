@@ -38,7 +38,7 @@ exports.viewSingle = async function (req, res) {
 
 exports.viewEditScreen = async function (req, res) {
   try {
-    let post = await Post.findSingleById(req.params.id, req.visitorId);
+    let post = await Post.findSinglePostById(req.params.id, req.visitorId);
     if (post.isVisitorOwner) {
       res.render("edit-post", { post: post });
     } else {

@@ -4,6 +4,7 @@ import DOMPurify from "dompurify";
 export default class Search {
   constructor() {
     //Select DOM
+    this._csrf = $("[name='_csrf']").val();
     this.injectHTML();
     this.headerSearchIcon = $(".header-search-icon");
     this.overlay = $(".search-overlay");
@@ -54,8 +55,9 @@ export default class Search {
   }
 
   sendRequest() {
+    //Postするときに_csrfをつけていればいい、受け取り側で何か処理する必要はなし
     axios
-      .post("/search", { searchTerm: this.inputField.val() })
+      .post("/search", { _csrf: this._csrf, searchTerm: this.inputField.val() })
       .then((response) => {
         this.renderResultsHTML(response.data);
       })

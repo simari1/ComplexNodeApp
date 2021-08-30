@@ -65,7 +65,7 @@ exports.viewEditScreen = function _callee2(req, res) {
         case 0:
           _context2.prev = 0;
           _context2.next = 3;
-          return regeneratorRuntime.awrap(Post.findSingleById(req.params.id, req.visitorId));
+          return regeneratorRuntime.awrap(Post.findSinglePostById(req.params.id, req.visitorId));
 
         case 3:
           post = _context2.sent;
